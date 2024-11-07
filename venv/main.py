@@ -8,15 +8,7 @@ from discord import app_commands
 class Client(commands.Bot):
     # Runs whenever the bot starts up
     async def on_ready(self):
-        print(f"{self.user} is here!")
-        try: 
-            guild = discord.Object(id=1303886816537088081)
-            synced = await self.tree.sync(guild = guild)
-            print(f"Synced {len(synced)} commands to guild {guild.id}")
-
-        except Exception as e:
-            print(f"Error syncing commands: {e}")
-            
+        print(f"{self.user} is here!")         
 
     async def on_message (self, message):
         # The bot won't respond to its own messages
