@@ -76,6 +76,43 @@ async def deleteRole(interaction: discord.Interaction, role_name: str):
     else:
         await interaction.response.send_message("You don't have permission")
 
+# Edit a role name and colour
+@client.tree.command(name="edit_role", description="Edit a role name and colour")
+async def editRole(interaction: discord.Interaction, role_name: str, new_role_name:str, color: str = "ffffff"):
+    # Stores the required role in the variable 
+    requiredRole = discord.utils.get(interaction.guild.roles, name="*")
+    # Checks if the user has the required role to use the command
+    if requiredRole in interaction.user.roles:
+        role = discord.utils.get(interaction.guild.roles, name = role_name)
+        # If the role exists it will change it
+        if role:
+            try:
+                color = discord.Color(int(color, 16))
+                await role.edit(name=new_role_name, color=color)
+                # Notifies the user the role has been changed
+                await interaction.response.send_message(f"Role `{role_name}` has been changed to {new_role_name}.")
+            except Exception as e:
+                # Tells user the role is not found
+                await interaction.response.send_message(f"Role `{role_name}` was not found")
+    else:
+        await interaction.response.send_message("You don't have permission")
+
+# Create a voice channel when user enters the "Create Voice" voice channel
+@client.event
+async def on_voice_state_update(member, before, after):
+    # Checks if anyone is in "Create Room" voice channel
+    if after.channel and after.channel.name == "Create Room":
+        guild = member.guild
+        # Creates a new voice called "{user}'s Room"
+        new_channel = await guild.create_voice_channel(name=f"{member.display_name}'s Room", category=discord.utils.get(guild.categories, name="Voice Channels"))
+        # Moves to user there
+        await member.move_to(new_channel)
+        # Checks if user left, then deletes channel
+        def check_voice_state(m, b, a):
+            return m == member and a.channel != new_channel
+        
+        await client.wait_for("voice_state_update", check=check_voice_state)
+        await new_channel.delete()
 
 # Discord token
 load_dotenv()
